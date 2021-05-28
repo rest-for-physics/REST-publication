@@ -1,0 +1,198 @@
+\section{General description}
+\label{sec:framework}
+
+% Table with useful information, code version, github address, zenodo reference, documentation
+
+% Mention physics units, basic geometrical routines TRestPhysics, TRestMesh, ...
+
+\emph{REST-for-Physics} is composed of a set of libraries written in C++ and it is fully integrated with ROOT~\cite{ROOT}, i.e. most C++ classes inherit from a ROOT TObject and therefore they can be read, accessed or written using the ROOT I/O interface. The only structural dependence is related to ROOT libraries, while other packages, as \emph{Geant4}~\cite{Agostinelli:2002hh} or \emph{Garfield++}~\cite{Garfield}, can be optionally integrated and used within the \emph{REST-for-Physics} framework when generating or processing Monte Carlo data. Being \emph{REST-for-Physics} a natural extension of ROOT, we follow the same naming conventions, which are the Taligent rules. On top of those standard naming conventions, any \emph{REST-for-Physics} C++ class (object) will be always started by the \emph{TRest} prefix. In this manuscript we will highlight the words when they clearly make a reference to an existing \emph{REST-for-Physics} C++ object. I.e. an object named \emph{TRestEvent} will be written in the following as \emph{event} or an object named \emph{TRestAnalysisTree} will be written as \emph{analysis tree}. Therefore, a highlighted word, within context, expresses a deep connection with the different elements of the code.
+
+%%%%%% THE MAIN FRAMEWORK DESCRIPTION %%%%%%%
+\subsection{The REST-for-Physics framework}
+Inside the \emph{REST-for-Physics} ecosystem we may distinguish a main library, or framework, that prototypes and fixes the implementation of most of the \emph{REST-for-Physics} elements. Those base objects serve to define common methods and data members for specific\footnote{The reader should notice that when we refer to specific objects, we refer to objects which inherit, in the strict sense of c++ object inheritance, from the base abstract objects, \emph{event}, \emph{metadata} and \emph{event process}. In the text, we will highlight the keyword \emph{specific} to refer to those inherited objects in a generic way, i.e. \emph{specific event} will be connected to any \emph{TRestSpecificEvent} or \emph{specific event process} would be connected to any \emph{TRestSpecificProcess}. It is worth to notice that event and process objects contain the \emph{event} and \emph{process} keywords in their class name, while metadata classes usually omit the use of the \emph{metadata} keyword. } objects. We shall briefly introduce those basic elements.
+
+%We briefly introduce those relevant objects, encoded as pure c++ abstract classes, and defined in the \emph{REST-for-Physics} framework.
+
+\begin{itemize}
+    \item The \emph{event} object encapsulates any specific \emph{event} data inside \emph{REST}. It defines common fields, such as timestamp or event id, and it prototypes common methods used for printing or drawing event information. A particular \emph{specific event} implementation defines a type, thus in what follows we will distinguish between the \emph{event} data as the explicit contents of a particular \emph{specific event}, and the \emph{event} type as the format, or structure, of the \emph{specific event}.
+    
+    \item A \emph{metadata} object can be initialized through a configuration file (at present we adopted the XML format). A \emph{metadata} class might be used as a mere information container, storing relevant parameters, that can be initialized through XML, such as the conditions of a \emph{Geant4} simulation, i.e. the \emph{geant4} metadata object, or it might adopt the shape of a complex object definition that implements advanced methods, such as the implementation of a \emph{detector readout}, or a \emph{magnetic field} volume including interpolation routines. Those advanced \emph{metadata} objects will be found at specialized libraries, some of them being detailed later on in section\,\ref{sec:libraries}. Conceptually we understand by \emph{metadata} any information required to give meaning to any \emph{specific event} data. Therefore, any input or output parameters, required during the processing or transformation of \emph{event} data, or type, using \emph{event processes}, is regarded also as \emph{metadata}. 
+    
+    \item The \emph{event process} object defines an input/output \emph{event} scheme allowing to interconnect different \emph{specific event process} implementations into a sequential processing chain. The \emph{event process} inherits itself from the \emph{metadata} object, since a process usually requires initialization to define few input parameters that control the behaviour of the process.
+\end{itemize}
+
+We will find other basic or elemental tools inside the main framework, such as output string helper methods, fundamental physics constants and units system, or other basic mathematical tools helping to the development of any specific \emph{event process}. Any \emph{metadata} or \emph{event process} object that does not require specific specialization will be likely hosted inside the framework domain.
+ On top of that, the framework repository\footnote{\url{https://github.com/rest-for-physics/framework}} serves to centralize other \emph{REST-for-Physics} components, such as libraries or packages. Those components will be briefly discussed and introduced later on in sections\,\ref{sec:libraries} and \ref{sec:packages}. %SUB-MODULES
+
+% Describe sub-modules, libraries and packages.
+
+% framework core, tools, analysis
+
+% define \emph{metadata} to TRestMetadata naming convention
+
+% Submodules, Libraries, packages, projects
+
+%%%%%% I/O Access and storage %%%%%%%
+\subsection{I/O access and metadata storage}
+
+%% Paragraph dedicated to REST progress and philosophy % Description of metadata+data concept
+%% During the last years, major upgrades took place on the REST core libraries\,\cite{Galan_8thTPC}. 
+
+
+% TRestRun (any event data processing taking place with REST will write to disk a TRestRun object, any REST object taking active part on the data processing will be stored in ROOT file.
+\emph{REST-for-Physics} uses the ROOT I/O interface to write \emph{event} and \emph{metadata} objects to disk. A ROOT file generated with \emph{REST} may contain any number of \emph{specific event} and \emph{specific metadata} objects, including any \emph{specific event process} (being a \emph{metadata} object itself). Those objects are stored in a unique file, together with the \emph{run} metadata object and the \emph{analysis tree} that are always present at any file that has been processed with \emph{REST}. The \emph{run} object registers few important values to identify the data file, such as the start time, duration, run number, etc, while the \emph{analysis tree} collects information, named observables, at any stage of the data processing. The \emph{run} object takes also an active role when accessing the different objects stored on disk by implementing helper methods to access the data, such as getting a list of events fulfilling particular conditions at the \emph{analysis tree} or retrieving directly the pointer to a given event id number, and updating simultaneously its corresponding \emph{analysis tree} entry.
+
+% something about metadata
+% For each aspect of \emph{metadata}, we define a class with proper data members to describe it, known as \emph{metadata} structures. 
+The framework philosophy is to create \emph{specific metadata} objects with dedicated data members to store any information crucial for the final analysis, and/or to fully determine the nature of the data we are storing. All the \emph{metadata} inherited objects gain data member reflection support, thus creating a relation between the c++ data member names and the text fields used in our configuration files. Through the implementation of the \emph{metadata} object we have designed a dedicated file format for \emph{REST}, based on Extensible Markup Language (XML). This upgrade allows us to read XML files with additional features, such as using system environment variables, complex programming instructions, including \emph{if} conditions or \emph{loops}, evaluation of mathematical expressions, or support for arbitrary physical units conversion inside any parameter.
+Using the \emph{metadata} implementation we create a unique relation between the configuration files and the existing c++ objects. In brief, a \emph{metadata} object is identified with a XML section, while a parameter definition inside the XML section is associated to a data member inside the object. 
+
+%% RML --> system environment variables + loops + mathematical expression evaluation + physical units support in parameters
+
+
+
+%% SHALL WE ILUSTRATE THIS WITH SOME CODE? Such as Int\_t fMetadataMember = 0;   is connected with `<parameter name="metadataMember" value="10"/>? 
+
+
+% A link is therefore established between class data members and text fields, enabling automatic reading of configuration files. We invented a file format for REST, \emph{rml}, based on Extensible Markup Language(xml). We believe the strong hierarchy and attribute sets provided by xml are beneficial in our application. All the running jobs, such as simulation, analysis, and file generation, are based on \emph{rml} encoded configuration file. 
+
+%% metadatda and rml. Shall we explain rml?
+% rml --> metadata class's data members. We now set a convention for rml parameters linked to metadata class's data members. **configurability** could be explained on "reflectable metadata"
+
+
+%%%% This paragraph will be considered at detector library, and at data processing chain.
+%% In addition to the storage of value sets, we have various tool methods provided by the \emph{metadata} structures which is useful in the analysis. For example in detector readout topology we enable readout channel position finding according to the daq ID, and in gas property we can calculate electron drift speed with certain external libraries.Any created \emph{metadata} structures will be stored to the output file. Moreover, any previous existing \emph{metadata} structures from input file will be transferred to output file. Traceability and reproducibility of REST data would be enhanced with this file logic. 
+
+% something about event data
+%% Basic introduction of data types and processes
+% An event type defines a particular structure that helps organizing different entities that keep a similar relation.
+%%% Multiple event types(data structures) are also defined in REST to store \emph{event data}, which could be generated either in data acquisition, simulation or data processing. The inherited common data fields, such as event id, time, tag, keeps continuity of data flow, while the special fields contained in each types conduct best structured data for different stages of analysis. Common interfaces are also implemented for visualizing and printing the \emph{event data} for each type of event. In addition, we also implemented various tool methods associated to the nature of each data structure, for example points rotation, Fast Fourier Transform (FFT), which helps to develop analysis code quickly. Each type of \emph{event data} is stored in an individual branch in the tree in the output file, helping to check the condition of each stage of analysis.
+
+\subsection{Event data processing and analysis}
+
+The framework allows us to build an event data processing chain in a modular way by interconnecting already existing \emph{specific event processes}, or to develop new ones with the potential to plug it directly to an existing processing chain. Each \emph{event process} has access to the input \emph{specific event}, the \emph{analysis tree}, and any \emph{metadata} object that it is accessible by the \emph{run} object. Depending on the input/output \emph{especific event} interaction inside the process we may attempt to classify the \emph{event processes} into four different groups.
+
+\begin{itemize}
+\item An \emph{external process} is a process that reads an external data source usually at the beginning of a \emph{REST} processing chain. It might be binary data generated by an acquisition system, or Monte Carlo data generated by an external simulation package. The process will be in charge of understanding the format of that external data and translate it into a \emph{REST specific event}.
+
+\item An \emph{internal process} is a process in which the \emph{specific event} input is the same type as the \emph{specific event} output. The \emph{event} data will be transformed but not the \emph{event} type. We will see later that processes that fulfil this condition will be put together into a library.
+
+\item A \emph{transformation process} is a process that receives as input a \emph{specific event} and transforms it to a different \emph{event} type. This kind of processes will be all placed at the \emph{connectors} library, described on section\,\ref{sec:libraries}, in order to encapsulate all library inter-dependencies at a single entity. 
+
+\item A \emph{pure analysis process} is a process that does not transform the \emph{specific event} type neither modifies the \emph{event} data contents. It may take information from the \emph{analysis tree}, perform calculations based on that information, and produce new observables inside the \emph{analysis tree}. This kind of process will be likely placed at the main framework, since no explicit \emph{specific event} access is required.
+\end{itemize}
+
+% Event transformation
+A \emph{specific event} might be transformed during the event processing and, in that transformation, relevant information might not be available anymore at the final transformed output event. The reason is that the role of the \emph{specific event} object is to provide a faithful or significant representation of the data at the state of processing where we are inside our processing chain, i.e. at different processing stages we might have the event data made of time signals registered at an electronics setup, or we might have the event data in the shape of discrete energy deposits at a physical coordinate system. Therefore, the transformation from one event data representation, or \emph{specific event}, into another, carries as a consequence that a relevant parameter available at a particular stage, is  not available anymore (or it is harder, less intuitive, accessing to it). 
+
+% Analysis tree description
+The \emph{analysis tree} comes into play as an instrument to collect all those parameters extracted or calculated from the \emph{specific event} information and that will be relevant for the final analysis.  Any \emph{specific event process} in the processing chain is allowed to add new observables to the \emph{analysis tree}. Once a process adds an observable to the \emph{analysis tree} this observable will be always available even if the \emph{event} data is transformed or the processing chain happens in several steps using different input/output \emph{REST} data files. The information at the \emph{analysis tree} is always accumulative, and therefore it will contain a full summary of the observables added by each process.
+%, following the decisions taken by the person in charge of the data chain design. 
+In brief, the \emph{analysis tree} provides a way for \emph{specific event processes} to export an analysis result to the framework.
+
+The information extracted by a process and added to the \emph{analysis tree} might be as simple as just a data member from the \emph{specific event} at a given stage of the processing chain, or it might be the result of a complex calculation in the context of a physics model, including complicated input \emph{metadata} objects or parameters. Of course, even in the case of basic observables extracted directly from the \emph{specific event}, the user might be interested to know the evolution of such observable after an intermediate processing. In order to do that, it is possible to define the same \emph{specific event process} twice at different positions in the sequential processing chain.
+
+
+%defines a particular analysis job upon a particular input event in order to manipulate the \emph{specific event} data, transform it and extract relevant information. 
+
+%Afterwards the \emph{event process} must yield an output event. 
+
+%In principle, any \emph{event process} that participates in a data processing chain must satisfy that its input event type corresponds with the output event type of the previous \emph{event process}. 
+
+The \emph{event process} object implements a method to facilitate the addition of observables to the \emph{analysis tree}. This method allows to create automatically a new observable from any c++ variable (including various c++ types, from base types to proper \emph{stl} containers). We do not need to care about global values and their addresses, weakening the concept of a ROOT TBranch and TTree helps us to reduce the number of lines in the code, while focusing more on analysis.
+
+%% discuss how to analyze Monte Carlo and experimental data using common event processes
+Our framework design is completely transparent to the processing of real experimental data, or Monte Carlo simulated data. The reason is that a \emph{specific event process} implementation may operate on both, real experimental data or Monte Carlo simulated data. The only requirement is that the experimental or simulated input \emph{event} must be given to the process in a particular \emph{specific event} type. If both, simulation or experimental data, are conditioned to fit in a common \emph{specific event} we will be able to build a processing chain that not only processes simulated data or experimental data, but that fully combines both. As a hypothetical case, we could integrate a process simulating the signal shaping of electronics into real experimental data to assess the benefit of applying such electronics setup in our real experiment. Furthermore, a proper conditioning of the generated Monte Carlo \emph{event} data will allow us to evaluate the algorithms for analysis to be used with the real experimental data even before the start of the physics data taking program.
+
+%Either Monte Carlo or experimental data can be the input of \emph{event processes}. 
+% For the Monte Carlo data, with properly conditioned simulation \emph{event processes}, we can reproduce the raw data of the detector acquisition. Once at that stage, by reusing common \emph{event processes}, we can analyze the simulation data just as experimental data. Algorithms can be developed with optimized data selection efficiency even before 
+
+
+% Discuss the analysis tree(what's better than basic tree) and idea of observable
+%REST provides an uniformed target, \emph{observable}, for the \emph{event processes} to export analysis result. 
+%\emph{Observable} is defined as any information extracted from \emph{event data}. 
+%It could be the raise times of each pulses in an event, the reconstructed event vertex/energy, the background likelihood of the event, etc. 
+%Multiple \emph{observables} can be associated to the \emph{event data}, forming a list of event properties. 
+
+
+%% discussion about multi thread 
+Event processes are executed through an efficient engine with multi-thread support. The data processing chain is cloned into multiple instances and kept in different threads respectively. During execution, the input event is in turn dispatched to each thread for processing, while the output event is redirected to the global output file for writing, leading to an increase of processing speed proportional to the number of threads enabled. Figure\,\ref{fig:processing} summarizes the input/output processing logic and the different concepts previously described in this section.   %Multi-thread operation is most helpful in case of algorithm verification, for example we can quickly get the result of a newly added observable to see if the code is alright.
+
+\begin{figure}[htb!]
+  \centering
+  \raisebox{-0.5\height}{\includegraphics[width=0.75\linewidth]{images/process_chain.png}}
+	\caption{A schematic showing the event data flow inside a \emph{REST} processing chain. The \emph{run} object is initialized, and it has access to any \emph{specific metadata} or \emph{event} data available at the input \emph{REST} file, or any additional objects described through \emph{rml}. The data is then processed using the implementation inside the \emph{process runner} object. Different event types (A,B,C,D) make reference to different \emph{specific event} implementations. The resulting output \emph{REST} file will contain all the \emph{metadata} information available to the chain, including any previously available, together with the transformed output \emph{specific event}, and the updated \emph{analysis tree}.  }\label{fig:processing}
+\end{figure}
+
+
+% Define different event processing types: pure analysis.
+
+% - Specific analysis process. It needs to access a particular event data type (it will be placed then at the corresponding library defining that event type).
+% - Pure analysis process. It only requires access to the analysis tree (and therefore it will be placed at the main framework).
+% - Conversion process. It is a process that interconnects 2 libraries by transferring an event type into another. Therefore, this kind of process will be placed at the dedicated `connectors` library.
+% We usually write \emph{event processes} in two major ways, identified by whether transforming the type of \emph{event data}. If the output event is transformed into another type, it is a \emph{conversion process}. If it operates in a particular event type, i.e. \emph{hit}, \emph{raw signal} or \emph{track processes}, in which the output event type remains unchanged, it is an \emph{analysis process}. In the following sub-sections we provide a description of the different processes involved in our data processing. A full, detailed and up-to-date list of documented processes will be available at~\cite{RESTsultan} for further reference.
+
+\subsection{Visualization and plotting}
+
+% TRestBrowser --> event by event **visualization**
+% TRestAnalysisPlot --> data statistics plot, histo
+% TRestMetadataPlot --> for metadata
+
+\emph{REST-for-Physics} implements routines for event visualization and observable plotting based on ROOT drawing objects and methods. We use ROOT graphical interface objects to create basic tools, such as an \emph{event browser} with a control panel and a drawing pad (see Figure\,\ref{fig:eventBrowser}). The drawing pad itself is the target of the \emph{draw event} method implemented at each \emph{specific event}. If enabled, different output \emph{specific event} trees - from different stages at the data processing - will have been stored in the same file. In that case the \emph{event browser} will be able to switch between the different event data representations.
+
+\begin{figure}[htb!]
+  \centering
+  \raisebox{-0.5\height}{\includegraphics[width=0.45\linewidth]{images/EventBrowser.png}\,\,\,\,\includegraphics[width=0.45\linewidth]{images/EventBrowserSelection.png}}
+	\caption{Two snapshots from the \emph{REST event browser} where we observe the control panel and the drawing pad showing an event entry for a \emph{raw signal event} (see section\,\ref{sec:libraries} for details on the \emph{specific event} type). On the left figure we present the complete event, while on the right figure the pulses have been filtered using an option passed to \emph{draw event} method implemented at each \emph{specific event}.}\label{fig:eventBrowser}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This is true, we have the choice to put all them together. But it would be good to implement a kind of "smart" event browser that would open all the previous files used on the processing and contain event data. Then we would create a new TAB for each type on the window PAD, there where it says "TAB 1", "TAB 2".
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% THIS IS AN OPTION
+%As described above, multiple event branches are stored in REST output file corresponding to the different stages of data processing. Each type of \emph{event data} contains a default visualization method to be drawn on the pad. When opening the file for visualization, one can simply switch between the entries, and view the \emph{event data} at different stages.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The \emph{analysis tree} object inherits directly from a ROOT TTree object, and therefore we may exploit all the resources provided by ROOT when analysing the observables that have been added to the \emph{analysis tree} by the different \emph{specific event processes} at the processing chain. I.e. we can use a ROOT TBrowser to explore the \emph{REST} data files, and quickly draw and inspect few variables from the \emph{analysis tree}. 
+
+Furthermore, \emph{REST} implements dedicated tools for automatic and systematic plot generation, such as the \emph{analysis plot} or the \emph{metadata plot} objects. 
+The \emph{analysis plot} will efficiently integrate the capability to merge thousands of files through a \emph{rml} file where we will define the plots that we want to produce with the combined data, including few advanced features such as classifying the produced histograms as a function of any \emph{specific metadata} member stored in the files, or define cuts based on the \emph{analysis tree} observables that serve to filter the data to be plotted. The \emph{analysis plot} object allows us to create a plot definition that can be used, for example, to produce quick analysis reports in \emph{pdf} format or to export histogram data in any other file format supported by ROOT.
+The \emph{metadata plot} object will allow us to read many \emph{REST} generated files and draw any \emph{specific metadata} member as a function of another \emph{specific metadata} member extracted from each of the \emph{REST} files provided. This will allow us to study for a long data-set the correlation between any two metadata parameters, or to plot the evolution of a metadata parameter as a function of the \emph{run} start time, or the associated run number, for example.
+
+%Histograms of \emph{observables} are generated with REST's analysis plot logic. Pads, plots, axis, legends, or even sub-pads and sub-plots, can all be defined through our \emph{rml} configuration file, ensuring better hierarchy and readability than C++ codes. Multiple files can be merged to a single figure or be classified into different figures. Figures can be drawn into pdf files with a single command. 
+
+% TRestAnalysisPlot, TRestMetadataPlot, ...
+
+\subsection{Execution and job management}
+
+% restRoot, macros, practical data chain processing definition
+Two executables are provided on the top level of REST framework. \emph{restRoot} provides a ROOT interactive prompt with REST libraries loaded, while \emph{restManager} launches a certain job according to \emph{rml} configuration file or C++ macro file. In addition, several alias are set as abbreviations for \emph{restManager} commands to enable one-key launch.
+
+\begin{figure}[htb!]
+  \centering
+  \raisebox{-0.5\height}{\includegraphics[width=0.9\linewidth]{images/executables.png}}
+	\caption{REST executables running logic}\label{fig:pipelines}
+\end{figure}
+
+% no need to explain TRestTask since it doesn't bring new concept
+
+% \subsection{Basic tools}
+
+
+\subsection{Project structure, versioning and code validation}
+
+% submodule strategy
+% versioning strategy
+% pipeline  validation
+
+Based on the main framework of REST, multiple libraries and packages are developed for specific fields of analysis, as described in \ref{sec:libraries}. Those libraries and packages are kept as git \emph{sub-modules} of REST main framework, with their versions evolving independently. Therefore, the development of \emph{sub-modules} could be separated from the main framework, contributing to a series of git repositories under multi-person work. During installation, specific libraries for different workloads can be selected to download, compile and install.
+
+To ensure the code quality maintaining multiple git repositories, each commit of the code will be verified by \emph{Gitlab CI pipeline}. Multiple unit tests are defined in sequence from coding style, compilation to the final execution. The yielded \emph{observables} must be same for a successful verification.
+
+% \subsection{Pipeline validation.}
+
+\begin{figure}[hb!]
+  \centering
+  \raisebox{-0.5\height}{\includegraphics[width=0.9\linewidth]{images/pipelines.png}}
+	\caption{Caption}\label{fig:pipelines}
+\end{figure}
