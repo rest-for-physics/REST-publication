@@ -21,12 +21,27 @@ The detector library\footnote{\url{https://github.com/rest-for-physics/detectorl
 
 The raw library\footnote{\url{https://github.com/rest-for-physics/rawlib}} is used to store time event pulses with a fixed number of bins. It includes processes related to signal conditioning, such as signal shaping, deconvolution, pulse fitting, de-noising, FFT, common noise reduction, and related routines. It is capable to read different binary formats from different electronic systems into REST.
 
+\begin{figure}[hb!]
+  \centering
+  \raisebox{-0.5\height}{\includegraphics[totalheight=4cm]{images/commonNoise.png}\includegraphics[totalheight=4cm]{images/shapingPlot.pdf}\includegraphics[totalheight=4cm]{images/fitComparison.pdf}}
+	\caption{XX}\label{fig:rawlib}
+\end{figure}
+
 \subsection{The geant4 library}
 the geant4 library\footnote{\url{https://github.com/rest-for-physics/geant4lib}} is used to store and analyse the events generated in a Geant4 simulation, it defines and stores the particle generator and simulation conditions, such as the details of the physics list used during the Monte Carlo.
 
 \subsection{The track library}
 
 The track library\footnote{\url{https://github.com/rest-for-physics/tracklib}} defines a track event type allowing to define inheritance relations between tracks that contain groups of hits. A process connecting to the detector library allows for hit clustering to create a first set of tracks using a distance relation. Graph theory processes are included in this library in order to identify and reconstruct a physical track, and execute topological algorithms.
+
+\begin{figure}
+\centering
+    \raisebox{-0.5\height}{\includegraphics[totalheight=4.9cm]{images/TrackReduction.png}
+    \includegraphics[totalheight=4.9cm]{images/TrackMinimized.png}
+    \includegraphics[totalheight=4.9cm]{images/TrackReconnected.png}}
+    \caption{xxx}
+    \label{fig:tracklib}
+\end{figure}
 
 \subsection{The connectors library}
 
