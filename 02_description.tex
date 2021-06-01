@@ -102,7 +102,7 @@ The information extracted by a process and added to the \emph{analysis tree} mig
 The \emph{event process} object implements a method to facilitate the addition of observables to the \emph{analysis tree}. This method allows to create automatically a new observable from any c++ variable (including various c++ types, from base types to proper \emph{stl} containers). We do not need to care about global values and their addresses, weakening the concept of a ROOT TBranch and TTree helps us to reduce the number of lines in the code, while focusing more on analysis.
 
 %% discuss how to analyze Monte Carlo and experimental data using common event processes
-Our framework design is completely transparent to the processing of real experimental data, or Monte Carlo simulated data. The reason is that a \emph{specific event process} implementation may operate on both, real experimental data or Monte Carlo simulated data. The only requirement is that the experimental or simulated input \emph{event} must be given to the process in a particular \emph{specific event} type. If both, simulation or experimental data, are conditioned to fit in a common \emph{specific event} we will be able to build a processing chain that not only processes simulated data or experimental data, but that fully combines both. As a hypothetical case, we could integrate a process simulating the signal shaping of electronics into real experimental data to assess the benefit of applying such electronics setup in our real experiment. Furthermore, a proper conditioning of the generated Monte Carlo \emph{event} data will allow us to evaluate the algorithms for analysis to be used with the real experimental data even before the start of the physics data taking program.
+Our framework design is completely transparent to the processing of real experimental data, or Monte Carlo simulated data. The reason is that a \emph{specific event process} implementation may operate on both scenarios. The only requirement is that the experimental or simulated input \emph{event} must be given to the process in the form of a \emph{specific event} type. If both, simulation or experimental data, are conditioned to fit in a common \emph{specific event} type, we will be able to build a processing chain that not only processes simulated data or experimental data, but that fully combines both. As a hypothetical case, we could integrate a process simulating the signal shaping of electronics into real experimental data to assess the benefit of applying such electronics setup in our real experiment. Furthermore, a proper conditioning of the generated Monte Carlo \emph{event} data will allow us to evaluate the algorithms for analysis to be used with the real experimental data even before the start of the physics data taking program.
 
 %Either Monte Carlo or experimental data can be the input of \emph{event processes}. 
 % For the Monte Carlo data, with properly conditioned simulation \emph{event processes}, we can reproduce the raw data of the detector acquisition. Once at that stage, by reusing common \emph{event processes}, we can analyze the simulation data just as experimental data. Algorithms can be developed with optimized data selection efficiency even before 
@@ -164,35 +164,39 @@ The \emph{metadata plot} object will allow us to read many \emph{REST} generated
 % TRestAnalysisPlot, TRestMetadataPlot, ...
 
 \subsection{Execution and job management}
-
 % restRoot, macros, practical data chain processing definition
-Two executables are provided on the top level of REST framework. \emph{restRoot} provides a ROOT interactive prompt with REST libraries loaded, while \emph{restManager} launches a certain job according to \emph{rml} configuration file or C++ macro file. In addition, several alias are set as abbreviations for \emph{restManager} commands to enable one-key launch.
+Two executables are provided on the top level of the \emph{REST-for-Physics} framework and are always available to any \emph{REST} user, \emph{restRoot} and \emph{restManager}. 
+\emph{restRoot} provides a ROOT interactive prompt with REST libraries loaded, and optionally with all the \emph{REST} macros, available at the different repositories, preloaded. 
+\emph{restManager} manages the execution of jobs. It might launch a processing chain defined through the \emph{process runner}, execute a method defined at any \emph{REST} object available to the \emph{run} object, or launch a ROOT C++ macro file. On top of that, macros might have been assigned an alias to allow the system to launch macros execution through \emph{restManager} with a single command. Packages, or applications, that link to \emph{REST} libraries will also provide their own executables, such as \emph{restG4} and \emph{restSQL}  (see Figure~\ref{fig:executables}). \emph{restManager} allows to define all those actions through a configurable \emph{rml} file, but on top of that, the \emph{manager}, executed through the \emph{restManager} executable, guarantees that the event data processing flow follows the standards previously described in Figure~\ref{fig:processing}.
 
 \begin{figure}[htb!]
   \centering
   \raisebox{-0.5\height}{\includegraphics[width=0.9\linewidth]{images/executables.png}}
-	\caption{REST executables running logic}\label{fig:pipelines}
+	\caption{REST executables running logic}\label{fig:executables}
 \end{figure}
+
+\subsection{Project structure, versioning and code validation}
+% submodule strategy
+
+The main framework defines the basic functions, and describes the behavior of the main elements of \emph{REST}. As previously mentioned it also serves to centralize all the \emph{REST-for-Physics} components, such as packages or libraries, and eventually dedicated projects. We have adopted a \emph{git submodule}\footnote{From this point we introduce few concepts connected with the code versioning system, \emph{git}, that are broadly available online, such as \emph{commit} or \emph{submodule}. When we refer to those alien concepts we will highlight it using the \emph{git} keyword followed by the specific concept name.} strategy to integrate those components in a modular way inside the main framework repository. This scheme allows us to independently monitor the development activity at each of those components, to isolate technical issues, and to focus on the functionality of each of those components. Each of those components evolve independently, with their own version or tracking system. A particular state of the code at each of those components is fixed at the main framework through a \emph{git commit} hash, or unique number. When that happens we say that the corresponding \emph{git commit} becomes the official component version of \emph{REST}.
+
+The framework repository fully centralizes the versioning system of \emph{REST}, understood as the state of the code at a given period of time, including the state of the official \emph{submodules} attached to it. Any \emph{REST metadata} object written to disk using the ROOT I/O scheme will be stamped with different values that assure that the data written to disk has been processed with a given version, or state of the code. In order to certify that, two metadata members will be initialized at compilation time. The first one will assure the source code was at a clean unmodified state respect to the \emph{git remote} repository, and the second metadata member will certify that the corresponding framework code state corresponds with an official \emph{git tag} release, where each \emph{git tag} at the main repository will produce a code release referenced at the \emph{Zenodo} system\,\cite{javier_galan_2021_4692983}.
+
+%Those libraries and packages are kept as \emph{git submodules} of REST main framework, with their versions evolving independently. Therefore, the development of \emph{sub-modules} could be separated from the main framework, contributing to a series of git repositories under multi-person work. During installation, specific libraries for different workloads can be selected to download, compile and install.
 
 % no need to explain TRestTask since it doesn't bring new concept
 
 % \subsection{Basic tools}
-
-
-\subsection{Project structure, versioning and code validation}
-
-% submodule strategy
 % versioning strategy
 % pipeline  validation
 
-Based on the main framework of REST, multiple libraries and packages are developed for specific fields of analysis, as described in \ref{sec:libraries}. Those libraries and packages are kept as git \emph{sub-modules} of REST main framework, with their versions evolving independently. Therefore, the development of \emph{sub-modules} could be separated from the main framework, contributing to a series of git repositories under multi-person work. During installation, specific libraries for different workloads can be selected to download, compile and install.
+To ensure the code quality and stability with time, each repository integrates a validation pipeline where basic tests on the code are performed, such as code formatting and style validation, linking of the libraries and building the code executables, or testing basic results from complex data processing chains (see Figure\,\ref{fig:pipelines}). Each modification to the code, or \emph{commit}, will be verified by running those validation pipelines. If a modification to the code produces an unexpected value on a consolidated data processing routine, the contributor will be notified, and changes will only become official after peer review of the code. This fact is extremely relevant to guarantee that our algorithms keep producing the expected results, or in the undesired case of a bug code identification, promptly identify the affected routines after bug correction. On top of that, validation pipelines might serve as running examples to show the integration or use of a specific tool or element operating inside the framework.
 
-To ensure the code quality maintaining multiple git repositories, each commit of the code will be verified by \emph{Gitlab CI pipeline}. Multiple unit tests are defined in sequence from coding style, compilation to the final execution. The yielded \emph{observables} must be same for a successful verification.
 
 % \subsection{Pipeline validation.}
 
-\begin{figure}[hb!]
+\begin{figure}[htb!]
   \centering
-  \raisebox{-0.5\height}{\includegraphics[width=0.9\linewidth]{images/pipelines.png}}
-	\caption{Caption}\label{fig:pipelines}
+  \raisebox{-0.5\height}{\includegraphics[width=0.75\linewidth]{images/pipelines.png}}
+	\caption{A snapshot from a validation pipeline running different tests triggered by an update to the code repository.}\label{fig:pipelines}
 \end{figure}
