@@ -5,8 +5,6 @@
 
 \journal{Computer Physics Communications}
 
-
-
 %% `Elsevier LaTeX' style
 \bibliographystyle{elsarticle-num}
 %%%%%%%%%%%%%%%%%%%%%%%
@@ -21,8 +19,6 @@
 
 %% Group authors per affiliation:
 \author{Konrad~Altenm\"uller}
-\author{Jose~Manuel~Carmona}
-\author{Juan~Francisco~Castel}
 \author{Susana~Cebri\'an}
 \author{Theopisti~Dafni}
 \author{David~D\'iez-Ib\'añez}
@@ -33,10 +29,8 @@
 \author{Igor~G.~Irastorza}
 \author{Gloria~Luz\'on}
 \author{Cristina~Margalejo}
-\author{Javier~Mena}
 \author{Hector~Mirallas}
 \author{Luis~Obis}
-\author{Alfonso~Ortiz~de~Sol\'orzano}
 \author{Oscar~P\'erez}
 
 \address{Center for Astroparticles and High Energy Physics (CAPA), Universidad de Zaragoza, 50009 Zaragoza, Spain}
@@ -79,9 +73,7 @@
 %\author[capa]{Oscar~P\'erez}
 
 
-%\ead[url]{www.elsevier.com}
 
-%\author[mysecondaryaddress]{Global Customer Service\corref{mycorrespondingauthor}}
 \cortext[mycorrespondingauthor]{Corresponding author}
 %\ead{support@elsevier.com}
 
@@ -97,11 +89,13 @@
 
 \begin{abstract}
 
-We present in this work an overview of the REST-for-Physics (Rare Event Searches Toolkit for Physics) ecosystem, providing a broad perspective to the infrastructure and organization of the project as a whole. The REST-for-Physics framework is a ROOT-based solution providing the means to process and analyze experimental or Monte Carlo event data.
+ The REST-for-Physics (Rare Event Searches Toolkit for Physics) framework is a ROOT-based solution providing the means to process and analyze experimental or Monte Carlo event data. Special care has been taken on the traceability of the code and the validation of the results produced within the framework, together with the connectivity between code and data stored registered through specific version metadata members.
+
+
 
 The framework development was originally motivated to cover the needs at Rare Event Searches experiments (experiments looking for phenomena having extremely low occurrence probability like dark matter or neutrino interactions or rare nuclear decays), and its components naturally implement tools to address the challenges in these kinds of experiments; the integration of a detector physics response, the implementation of signal processing routines, or topological algorithms for physical event identification are some examples. Despite this specialization, the framework was conceived thinking in scalability, and other event-oriented applications could benefit from the data processing and/or metadata description implemented in REST, being the generic framework tools completely decoupled from dedicated libraries.
 
-REST-for-Physics is a consolidated piece of software already serving the needs of different physics experiments - using  gaseous Time Projection Chambers (TPCs) as detection technology - for background data analysis and detector characterization, as well as generic detector R\&D. Even though REST has been exploited mainly with gaseous TPCs, the code could be easily applied or adapted to other detection technologies. As such, special care has been taken on the traceability of the code and the validation of the results produced within the framework, together with the connectivity between code and data stored registered through specific version metadata members. The framework and its different components will be detailed in the text.
+REST-for-Physics is a consolidated piece of software already serving the needs of different physics experiments - using  gaseous Time Projection Chambers (TPCs) as detection technology - for background data analysis and detector characterization, as well as generic detector R\&D. Even though REST has been exploited mainly with gaseous TPCs, the code could be easily applied or adapted to other detection technologies. We present in this work an overview of REST-for-Physics, providing a broad perspective to the infrastructure and organization of the project as a whole. The framework and its different components will be described in the text.
 
 % Detector physics
 
@@ -116,6 +110,7 @@ Software architectures (event data models, frameworks and databases)\sep Simulat
 \linenumbers
 
 \input{01_introduction}
+\input{02_conception}
 \input{02_description}
 \input{03_libraries}
 \input{04_summary}
@@ -124,9 +119,9 @@ Software architectures (event data models, frameworks and databases)\sep Simulat
 We acknowledge support from the the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation programme, grant agreement ERC-2017-AdG788781 (IAXO+), and from the Spanish Agencia Estatal de Investigaci\'on under grant FPA2016-76978-C3-1-P. The IRFU group acknowledges support from the Agence Nationale de la Recherche (France) ANR-19-CE31-0024.
 
 %\begin{figure}[htb!]
-  \centering
-  \raisebox{-0.5\height}{\includegraphics[width=0.99\linewidth]{images/institution_logos.png}}
-
+%  \centering
+%  \raisebox{-0.5\height}{\includegraphics[width=0.99\linewidth]{images/logosX.png}}
+%
 \bibliography{paper}
 
 \end{document}
